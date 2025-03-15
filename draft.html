@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Tic-Tac-Toe</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Background -->
+    <div class="background"></div>
+
+    <!-- Scoreboard -->
+    <div class="scoreboard">
+        <div class="score">
+            <span class="player">X</span>
+            <span class="separator">-</span>
+            <span id="scoreX">0</span>
+        </div>
+        <div class="score">
+            <span class="player">O</span>
+            <span class="separator">-</span>
+            <span id="scoreO">0</span>
+        </div>
+    </div>
+
+    <!-- Tic Tac Toe Board -->
+    <div class="board">
+        <div class="cell" onclick="makeMove(0)"></div>
+        <div class="cell" onclick="makeMove(1)"></div>
+        <div class="cell" onclick="makeMove(2)"></div>
+        <div class="cell" onclick="makeMove(3)"></div>
+        <div class="cell" onclick="makeMove(4)"></div>
+        <div class="cell" onclick="makeMove(5)"></div>
+        <div class="cell" onclick="makeMove(6)"></div>
+        <div class="cell" onclick="makeMove(7)"></div>
+        <div class="cell" onclick="makeMove(8)"></div>
+    </div>
+
+    <!-- Winner Message -->
+    <div id="winner-message"></div>
+
+    <!-- Buttons -->
+    <button class="reset-button" onclick="resetGame()">Reset Game</button>
+    
+
+    <!-- Winner Popup Modal -->
+    <div id="winner-popup" class="modal">
+        <div class="modal-content">
+            <span id="winner-text"></span>
+        </div>
+    </div>
+
+    <!-- Draw Popup Modal -->
+    <div id="draw-popup" class="modal">
+        <div class="modal-content">
+            <span id="draw-text">It's a draw!</span>
+        </div>
+    </div>
+
+<script>
+    let board = ["", "", "", "", "", "", "", "", ""];
+    let currentPlayer = "X";
+    let gameActive = true;
+    let leaderboard = { X: 0, O: 0 };
+
+    // Make a move
+    function makeMove(index) {
+        if (board[index] === "" && gameActive) {
+            board[index] = currentPlayer;
+            document.querySelectorAll(".cell")[index].innerText = currentPlayer;
+            document.querySelectorAll(".cell")[index].classList.add(currentPlayer.toLowerCase());
+
+            if (checkWin()) {
+                displayWinner(currentPlayer);
+            } else if (board.every(cell => cell !== "")) {
+                displayDraw(); // Display the draw popup
+            } else {
+                currentPlayer = currentPlayer === "X" ? "O" : "X";
+            }
+        }
+    }
+
+    // Check win condition
+    function checkWin() {
+        const winPatterns = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ];
+        return winPatterns.some(pattern => {
+            const [a, b, c] = pattern;
+            return board[a] && board[a] === board[b] && board[a] === board[c];
+        });
+    }
+
+    // Display the winner and update the leaderboard
+    function displayWinner(winner) {
+        gameActive = false;
+        leaderboard[winner]++;
+        updateLeaderboard();
+        
+        // Show winner in the modal
+        const winnerPopup = document.getElementById("winner-popup");
+        const winnerText = document.getElementById("winner-text");
+        winnerText.innerText = `${winner} wins!`;
+        winnerPopup.style.display = "flex"; // Make the modal visible
+
+        // Set a timeout to reset the game after the winner is shown
+        setTimeout(() => {
+            winnerPopup.style.display = "none"; // Hide modal
+            startNewGame();
+            currentPlayer = winner === "X" ? "O" : "X";  // Start with the other player's turn after a win
+        }, 2000); // Wait 2 seconds before hiding the modal and starting a new game
+    }
+
+    // Display the draw popup
+    function displayDraw() {
+        gameActive = false;
+
+        // Show draw in the modal
+        const drawPopup = document.getElementById("draw-popup");
+        const drawText = document.getElementById("draw-text");
+        drawText.innerText = "It's a draw!";
+        drawPopup.style.display = "flex"; // Make the modal visible
+
+        // Set a timeout to reset the game after the draw is shown
+        setTimeout(() => {
+            drawPopup.style.display = "none"; // Hide modal
+            startNewGame();
+        }, 2000); // Wait 2 seconds before hiding the modal and starting a new game
+    }
+
+    // Start a new game
+    function startNewGame() {
+        board = ["", "", "", "", "", "", "", "", ""];
+        gameActive = true;
+        document.querySelectorAll(".cell").forEach(cell => {
+            cell.innerText = "";
+            cell.classList.remove("x", "o");
+        });
+        document.getElementById("winner-message").innerText = "";
+    }
+
+
+    // Reset the game
+    function resetGame() {
+        leaderboard = { X: 0, O: 0 };
+        updateLeaderboard();
+        startNewGame();
+        document.getElementById("reset-button").style.display = "none"; // Initially hidden
+    }
+
+    // Update the leaderboard
+    function updateLeaderboard() {
+        document.getElementById("scoreX").innerText = leaderboard.X;
+        document.getElementById("scoreO").innerText = leaderboard.O;
+    }
+
+    document.getElementById("reset-button").style.display = "none"; // Initially hidden
+</script>
+
+</body>
+</html>
+
+<style>
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #1a0a2a;
+  color: white;
+  font-family: Arial, sans-serif;
+  position: relative;
+}
+
+.background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, black 0%, rgba(59, 59, 59, 0.54) 100%),
+              url('https://i.pinimg.com/736x/55/91/2e/55912e438b16eea0b5e91f841202aa75.jpg') center/cover no-repeat;
+  opacity: 0.4;
+  z-index: -1;
+}
+
+.scoreboard {
+  display: flex;
+  gap: 50px;
+  font-size: 40px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.score {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 40px;
+  width: 120px;
+  border: 2px solid #fff;
+  border-radius: 30px;
+  background-color:rgba(0, 0, 0, 0.6);
+  box-shadow: 0px 0px 10px #96c9fb;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 144px);
+  grid-template-rows: repeat(3, 144px);
+  gap: 5px;
+  border: 2px solid #c0d8ef;
+  border-radius: 30px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.9);
+  box-shadow: 0px 0px 20px #f0f0f0;
+}
+
+.cell {
+    padding-left:7px;
+  padding-bottom: 4px;
+  width: 135px;
+  height: 135px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 50px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 20px;
+  box-shadow: inset 0px 0px 10px #F0F0F0;
+  background-color: rgba(255, 255, 255, 0.15);
+  text-shadow: 0px 0px 15px rgba(255, 255, 255, 1);
+}
+
+.x {
+    color: #96c9fb;
+  text-shadow: 0px 0px 15px #1E90FF;
+  font-size:130px;
+  font-family: 'Quicksand',sans-serif;
+  font-weight: 300;
+}
+
+.o {
+    color: #F0F0F0;
+  text-shadow: 0px 0px 15px #F0F0F0;
+  font-family:'Quicksand',sans-serif;
+  font-size:130px;
+  font-weight:300;
+}
+
+.reset-button {
+  margin-top: 20px;
+  font-size: 25px;
+  padding-bottom: 5px;
+  height: 50px;
+  width: 200px;
+  font-family: 'Quicksand',sans-serif;
+  font-weight: 600;
+  border-radius:20px;
+  box-shadow: 0px 0px 10px #F0F0F0;
+  background-color: rgba(0, 0, 0, 0.454);
+  color: #c0d8ef;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: rgba(0, 0, 0, 0.9);
+    padding: 40px;
+    font-family:'Quicksand',sans-serif;
+    border-radius: 20px;
+    text-align: center;
+    font-size: 40px;
+    color: white;
+    box-shadow: 0px 0px 20px #f0f0f0;
+    border: 2px solid #c0d8ef;
+}
+.player {
+  font-family:'Quicksand',sans-serif;
+}
+.separator {
+  font-family:'Quicksand',sans-serif;
+}
+#scoreX, #scoreO {
+  font-family:'Quicksand',sans-serif;
+}
+
+</style>
